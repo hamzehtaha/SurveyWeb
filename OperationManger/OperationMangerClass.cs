@@ -205,6 +205,7 @@ namespace OperationManger
         {
             try
             {
+                GetQustion(ref ListOfAllQuestion); 
                 ThreadForRefresh = new Thread(CheckForRefresh);
                 ThreadForRefresh.IsBackground = true;
                 ThreadForRefresh.Start();
@@ -247,11 +248,6 @@ namespace OperationManger
                     if (IsDifferntList)
                     {
                         ListOfAllQuestion = TempListOfQuestion.ToList();
-                        foreach (var key in SessionFlags.Keys.ToList())
-                        {
-                            SessionFlags[key] = true; 
-                        }
-
                         if (PutListToShow != null) {
                             PutListToShow(); 
                         } 
@@ -259,6 +255,7 @@ namespace OperationManger
                     Thread.Sleep(TimeForChangeData); 
 
                 }
+
             }catch (Exception ex)
             {
                 GenralVariables.Errors.Log(ex.Message);

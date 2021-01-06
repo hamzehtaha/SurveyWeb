@@ -47,7 +47,6 @@
         .dropdown:hover .dropbtn {
             background-color: #3e8e41;
         }
-
     </style>
 </head>
 <div dir="@SurveyWebSite.Resources.Constants.dir">
@@ -71,19 +70,4 @@
         </div>
     </div>
 </div>
-<script type="text/javascript">
-    var idVar = setInterval(() => {
-        GetData()
-    },60000);
-    function GetData() {
-        $.ajax({
-            url: "/Question/RefreshData/",
-            type: "get",
-            success: function (result) {
-                $('#ListOfQuestion').html(result);
-            }
-        });
 
-    }
-
-</script>

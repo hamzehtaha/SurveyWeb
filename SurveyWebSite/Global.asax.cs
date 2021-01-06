@@ -1,6 +1,7 @@
 ﻿using OperationManger;
 using Question;
 using SurveyWebSite.Controllers;
+using SurveyWebSite.Hubs;
 using SurveyWebSite.Models;
 using System;
 using System.Collections.Generic;
@@ -25,8 +26,8 @@ namespace SurveyWebSite
                 FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
                 RouteConfig.RegisterRoutes(RouteTable.Routes);
                 BundleConfig.RegisterBundles(BundleTable.Bundles);
-                ModelBinders.Binders.Add(typeof(Qustion), new QustionModelBinder());
-                Operation.RefreshData(); 
+                Operation.RefreshData();
+                //Operation.PutListToShow = QuestionHub.Show; 
             }
             catch (Exception ex)
             {

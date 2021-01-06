@@ -12,6 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.UI.HtmlControls;
 using System.Web.UI;
+using System.Data.SqlClient;
+using SurveyWebSite.Hubs;
 
 namespace SurveyWebSite.Controllers
 {
@@ -75,33 +77,37 @@ namespace SurveyWebSite.Controllers
         }
         /// <summary>
         /// This create view for get a question to add it 
-        /// 1 mean slider question 
-        /// 2 mean Smile question 
-        /// 3 mean Star question
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        public ActionResult Create(int Type)
+        public ActionResult CreateQuestion(int Type)
         {
             try
             {
-                TypeOfQuestion QuestionType = (TypeOfQuestion)Type; 
-                switch (QuestionType) {
+                TypeOfQuestion QuestionType = (TypeOfQuestion)Type;
+                switch (QuestionType)
+                {
                     case TypeOfQuestion.Slider:
-                        return View(new Slider());
+                        QuestionModel Slider = new QuestionModel();
+                        Slider.TypeOfQuestion = TypeOfQuestion.Slider;
+                        return View(Slider);
                     case TypeOfQuestion.Smily:
-                        return View(new Smiles());
+                        QuestionModel Smile = new QuestionModel();
+                        Smile.TypeOfQuestion = TypeOfQuestion.Smily;
+                        return View(Smile);
                     case TypeOfQuestion.Stars:
-                        return View(new Stars());
+                        QuestionModel Star = new QuestionModel();
+                        Star.TypeOfQuestion = TypeOfQuestion.Stars;
+                        return View(Star);
                     default:
                         return View(@SurveyWebSite.Resources.Messages.ErrorCreate);
                 }
 
-                
-            }catch(Exception ex)
+
+            }
+            catch (Exception ex)
             {
                 Logger.Log(ex.Message);
-                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorCreate});
+                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorCreate });
             }
         }
         /// <summary>
@@ -110,32 +116,39 @@ namespace SurveyWebSite.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([ModelBinder(typeof(QustionModelBinder))]Qustion NewQuestion)
+        public ActionResult CreateQuestion(QuestionModel NewQustionModel)
         {
             try
             {
-                int ResultOfCheck = Operation.CheckTheData(NewQuestion);
-                if (ResultOfCheck == OperationManger.GenralVariables.Succeeded)
+                Qustion NewQuestion = SpecifyTheTypeAndCreateTheQuestion(NewQustionModel);
+                if (NewQuestion != null)
                 {
-                   int ResultOfCreate =  Operation.AddQustion(NewQuestion);
-                    if (ResultOfCreate == OperationManger.GenralVariables.Succeeded)
+                    int ResultOfCheck = Operation.CheckTheData(NewQuestion);
+                    if (ResultOfCheck == OperationManger.GenralVariables.Succeeded)
                     {
-                        ModelState.Clear();
-                        return RedirectToAction(@SurveyWebSite.Resources.Constants.HomeView);
+                        int ResultOfCreate = Operation.AddQustion(NewQuestion);
+                        if (ResultOfCreate == OperationManger.GenralVariables.Succeeded)
+                        {
+                            ModelState.Clear();
+                            return RedirectToAction(@SurveyWebSite.Resources.Constants.HomeView);
+                        }
+                        else
+                        {
+                            string Error = Operation.CheckMessageError(ResultOfCreate);
+                            return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = Error });
+                        }
                     }
                     else
                     {
-                        string Error = Operation.CheckMessageError(ResultOfCreate);
-                        return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage =Error}); 
+                        ViewBag.Message = Operation.CheckMessageError(ResultOfCheck);
+                        NewQustionModel.TypeOfQuestion = NewQuestion.TypeOfQuestion;
+                        return View(NewQustionModel);
                     }
+
                 }
-                else
-                {
-                    ViewBag.Message = Operation.CheckMessageError(ResultOfCheck);
-                    return View(NewQuestion); 
-                }
-            }catch (Exception ex)
+                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = "Error while create question" });
+            }
+            catch (Exception ex)
             {
                 Logger.Log(ex.Message);
                 return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorCreate });
@@ -191,80 +204,99 @@ namespace SurveyWebSite.Controllers
         /// <summary>
         /// This get method take id the question to show the data  
         /// </summary>
-        [HttpGet]
-        public ActionResult Edit (int Id)
+        public ActionResult EditQuestion(int Id)
         {
             try
             {
-                var ObjectWillEdit = Operation.SelectById(Id);
-                if (ObjectWillEdit == null)
+                var QuestionWillEdit = Operation.SelectById(Id);
+                QuestionModel NewQustionModel = new QuestionModel();
+                switch (QuestionWillEdit.TypeOfQuestion)
                 {
-                    return HttpNotFound();
+                    case TypeOfQuestion.Slider:
+                        NewQustionModel.TypeOfQuestion = TypeOfQuestion.Slider;
+                        Slider QuestionSlider = (Slider)QuestionWillEdit;
+                        NewQustionModel.Id = QuestionSlider.Id;
+                        NewQustionModel.IdForType = QuestionSlider.IdForType;
+                        NewQustionModel.NewText = QuestionSlider.NewText;
+                        NewQustionModel.Order = QuestionSlider.Order;
+                        NewQustionModel.StartValue = QuestionSlider.StartValue;
+                        NewQustionModel.EndValue = QuestionSlider.EndValue;
+                        NewQustionModel.StartCaption = QuestionSlider.StartCaption;
+                        NewQustionModel.EndCaption = QuestionSlider.EndCaption;
+                        break;
+                    case TypeOfQuestion.Smily:
+                        NewQustionModel.TypeOfQuestion = TypeOfQuestion.Smily;
+                        Smiles QuestionSmile = (Smiles)QuestionWillEdit;
+                        NewQustionModel.Id = QuestionSmile.Id;
+                        NewQustionModel.IdForType = QuestionSmile.IdForType;
+                        NewQustionModel.NewText = QuestionSmile.NewText;
+                        NewQustionModel.Order = QuestionSmile.Order;
+                        NewQustionModel.NumberOfSmiles = QuestionSmile.NumberOfSmiles;
+                        break;
+                    case TypeOfQuestion.Stars:
+                        NewQustionModel.TypeOfQuestion = TypeOfQuestion.Stars;
+                        Stars QuestionStar = (Stars)QuestionWillEdit;
+                        NewQustionModel.Id = QuestionStar.Id;
+                        NewQustionModel.IdForType = QuestionStar.IdForType;
+                        NewQustionModel.NewText = QuestionStar.NewText;
+                        NewQustionModel.Order = QuestionStar.Order;
+                        NewQustionModel.NumberOfStars = QuestionStar.NumberOfStars;
+                        break;
+
                 }
-                if (ObjectWillEdit.TypeOfQuestion == TypeOfQuestion.Slider)
-                {
-                    var SliderEdit = (Slider)ObjectWillEdit;
-                    Form[SurveyWebSite.Resources.Constants.ID] = SliderEdit.Id.ToString();
-                    Form[SurveyWebSite.Resources.Constants.IdForType] = SliderEdit.IdForType.ToString();
-                    return View(SliderEdit);
-                }
-                else if (ObjectWillEdit.TypeOfQuestion == TypeOfQuestion.Smily)
-                {
-                    var SmileEdit = (Smiles)ObjectWillEdit;
-                    Form[SurveyWebSite.Resources.Constants.ID] = SmileEdit.Id.ToString();
-                    Form[SurveyWebSite.Resources.Constants.IdForType] = SmileEdit.IdForType.ToString();
-                    return View(SmileEdit);
-                }
-                else if (ObjectWillEdit.TypeOfQuestion == TypeOfQuestion.Stars)
-                {
-                    var StarForEdit = (Stars)ObjectWillEdit;
-                    Form[SurveyWebSite.Resources.Constants.ID] = StarForEdit.Id.ToString();
-                    Form[SurveyWebSite.Resources.Constants.IdForType] = StarForEdit.IdForType.ToString();
-                    return View(StarForEdit);
-                }
-                return View();
-            }catch(Exception ex)
+                return View(NewQustionModel);
+            }
+            catch (Exception ex)
             {
                 Logger.Log(ex.Message);
                 return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorEdit });
             }
-                
+
         }
         /// <summary>
         /// Edit post when user press yes will check the validate data then call edit function from manger
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Edit([ModelBinder(typeof(QustionModelBinder))] Qustion NewQuestion)
+        public ActionResult EditQuestion(QuestionModel NewQustion)
         {
             try
             {
-                NewQuestion.Id = Convert.ToInt32(Form[SurveyWebSite.Resources.Constants.ID]);
-                int ResultOfCheck = Operation.CheckTheData(NewQuestion);
-                if (ResultOfCheck == OperationManger.GenralVariables.Succeeded)
+                Qustion QuestionWillEdit = SpecifyTheTypeAndCreateTheQuestion(NewQustion);
+                QuestionWillEdit.Id = NewQustion.Id;
+                if (QuestionWillEdit != null)
                 {
-                    int ResultOfEdit = Operation.EditQustion(NewQuestion);
-                    if (ResultOfEdit == OperationManger.GenralVariables.Succeeded)
+                    int ResultOfCheck = Operation.CheckTheData(QuestionWillEdit);
+                    if (ResultOfCheck == OperationManger.GenralVariables.Succeeded)
                     {
-                        ModelState.Clear();
-                        return RedirectToAction(@SurveyWebSite.Resources.Constants.HomeView);
+                        int ResultOfCreate = Operation.EditQustion(QuestionWillEdit);
+                        if (ResultOfCreate == OperationManger.GenralVariables.Succeeded)
+                        {
+                            ModelState.Clear();
+                            return RedirectToAction(@SurveyWebSite.Resources.Constants.HomeView);
+                        }
+                        else
+                        {
+                            string Error = Operation.CheckMessageError(ResultOfCreate);
+                            return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = Error });
+                        }
                     }
                     else
                     {
-                        string Error = Operation.CheckMessageError(ResultOfEdit);
-                        return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = Error });
+                        ViewBag.Message = Operation.CheckMessageError(ResultOfCheck);
+                        return View(NewQustion);
                     }
+
                 }
-                else
-                {
-                    ViewBag.FailMessage = Operation.CheckMessageError(ResultOfCheck);
-                    return View(NewQuestion);
-                }
-            }catch (Exception ex)
+                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = "Error while create question" });
+
+            }
+            catch (Exception ex)
             {
                 Logger.Log(ex.Message);
                 return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorEdit });
             }
+
         }
         /// <summary>
         /// To change lanuage and take the language  
@@ -305,76 +337,8 @@ namespace SurveyWebSite.Controllers
                 return View(); 
             }
         }
-        public ActionResult CreateQuestion(int Type)
-        {
-            try
-            {
-                TypeOfQuestion QuestionType = (TypeOfQuestion)Type;
-                switch (QuestionType)
-                {
-                    case TypeOfQuestion.Slider:
-                        QuestionModel Slider = new QuestionModel();
-                        Slider.TypeOfQuestion = TypeOfQuestion.Slider; 
-                        return View(Slider);
-                    case TypeOfQuestion.Smily:
-                        QuestionModel Smile = new QuestionModel();
-                        Smile.TypeOfQuestion = TypeOfQuestion.Smily;
-                        return View(Smile);
-                    case TypeOfQuestion.Stars:
-                        QuestionModel Star = new QuestionModel();
-                        Star.TypeOfQuestion = TypeOfQuestion.Stars;
-                        return View(Star);
-                    default:
-                        return View(@SurveyWebSite.Resources.Messages.ErrorCreate);
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.Message);
-                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorCreate });
-            }
-        }
-        [HttpPost]
-        public ActionResult CreateQuestion(QuestionModel NewQustionModel)
-        {
-            try
-            {
-                Qustion NewQuestion = SpecifyTheTypeAndCreateTheQuestion(NewQustionModel);
-                if (NewQuestion != null)
-                {
-                    int ResultOfCheck = Operation.CheckTheData(NewQuestion);
-                    if (ResultOfCheck == OperationManger.GenralVariables.Succeeded)
-                    {
-                        int ResultOfCreate = Operation.AddQustion(NewQuestion);
-                        if (ResultOfCreate == OperationManger.GenralVariables.Succeeded)
-                        {
-                            ModelState.Clear();
-                            return RedirectToAction(@SurveyWebSite.Resources.Constants.HomeView);
-                        }
-                        else
-                        {
-                            string Error = Operation.CheckMessageError(ResultOfCreate);
-                            return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = Error });
-                        }
-                    }
-                    else
-                    {
-                        ViewBag.Message = Operation.CheckMessageError(ResultOfCheck);
-                        NewQustionModel.TypeOfQuestion = NewQuestion.TypeOfQuestion; 
-                        return View(NewQustionModel);
-                    }
-                    
-                }
-                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = "Error while create question" });
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.Message);
-                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorCreate });
-            }
-        }       
+        
+        
         private Qustion SpecifyTheTypeAndCreateTheQuestion (QuestionModel NewQustion)
         {
             try
@@ -432,95 +396,12 @@ namespace SurveyWebSite.Controllers
 
         }
 
-        public ActionResult EditQuestion (int Id)
+        public ActionResult GetData()
         {
-            try
-            {
-                var QuestionWillEdit = Operation.SelectById(Id);
-                QuestionModel NewQustionModel =new QuestionModel();
-                switch (QuestionWillEdit.TypeOfQuestion) 
-                {
-                    case TypeOfQuestion.Slider:
-                        NewQustionModel.TypeOfQuestion = TypeOfQuestion.Slider;
-                        Slider QuestionSlider = (Slider)QuestionWillEdit; 
-                        NewQustionModel.Id = QuestionSlider.Id;
-                        NewQustionModel.IdForType = QuestionSlider.IdForType;
-                        NewQustionModel.NewText = QuestionSlider.NewText;
-                        NewQustionModel.Order = QuestionSlider.Order;
-                        NewQustionModel.StartValue = QuestionSlider.StartValue;
-                        NewQustionModel.EndValue = QuestionSlider.EndValue;
-                        NewQustionModel.StartCaption = QuestionSlider.StartCaption;
-                        NewQustionModel.EndCaption = QuestionSlider.EndCaption;
-                        break; 
-                    case TypeOfQuestion.Smily:
-                        NewQustionModel.TypeOfQuestion = TypeOfQuestion.Smily;
-                        Smiles QuestionSmile = (Smiles)QuestionWillEdit;
-                        NewQustionModel.Id = QuestionSmile.Id;
-                        NewQustionModel.IdForType = QuestionSmile.IdForType;
-                        NewQustionModel.NewText = QuestionSmile.NewText;
-                        NewQustionModel.Order = QuestionSmile.Order;
-                        NewQustionModel.NumberOfSmiles = QuestionSmile.NumberOfSmiles;
-                        break;
-                    case TypeOfQuestion.Stars:
-                        NewQustionModel.TypeOfQuestion = TypeOfQuestion.Stars;
-                        Stars QuestionStar = (Stars)QuestionWillEdit;
-                        NewQustionModel.Id = QuestionStar.Id;
-                        NewQustionModel.IdForType = QuestionStar.IdForType;
-                        NewQustionModel.NewText = QuestionStar.NewText;
-                        NewQustionModel.Order = QuestionStar.Order;
-                        NewQustionModel.NumberOfStars = QuestionStar.NumberOfStars;
-                        break; 
-                
-                }
-                return View(NewQustionModel);
-            }
-            catch(Exception ex)
-            {
-                Logger.Log(ex.Message);
-                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorEdit });
-            }
-
+            var ListQuestion = Operation.GetAllQuestion();
+            return PartialView("_ListPartail", ListQuestion);
         }
-        [HttpPost]
-        public ActionResult EditQuestion(QuestionModel NewQustion)
-        {
-            try
-            {
-                Qustion QuestionWillEdit = SpecifyTheTypeAndCreateTheQuestion(NewQustion);
-                QuestionWillEdit.Id = NewQustion.Id; 
-                if (QuestionWillEdit != null)
-                {
-                    int ResultOfCheck = Operation.CheckTheData(QuestionWillEdit);
-                    if (ResultOfCheck == OperationManger.GenralVariables.Succeeded)
-                    {
-                        int ResultOfCreate = Operation.EditQustion(QuestionWillEdit);
-                        if (ResultOfCreate == OperationManger.GenralVariables.Succeeded)
-                        {
-                            ModelState.Clear();
-                            return RedirectToAction(@SurveyWebSite.Resources.Constants.HomeView);
-                        }
-                        else
-                        {
-                            string Error = Operation.CheckMessageError(ResultOfCreate);
-                            return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = Error });
-                        }
-                    }
-                    else
-                    {
-                        ViewBag.Message = Operation.CheckMessageError(ResultOfCheck);
-                        return View(NewQustion);
-                    }
+        
 
-                }
-                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = "Error while create question" });
-
-            }
-            catch(Exception ex)
-            {
-                Logger.Log(ex.Message);
-                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorEdit });
-            }
-
-        }
     }
 }
