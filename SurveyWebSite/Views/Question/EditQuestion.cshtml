@@ -1,0 +1,18 @@
+﻿@model SurveyWebSite.Models.QuestionModel
+<div dir="@SurveyWebSite.Resources.Constants.dir">
+    @{ switch (Model.TypeOfQuestion)
+                    {
+                        case Question.TypeOfQuestion.Slider:
+                            Html.RenderPartial("_Slider");
+                            break;
+                        case Question.TypeOfQuestion.Smily:
+                            Html.RenderPartial("_Smile");
+                            break;
+                        case Question.TypeOfQuestion.Stars:
+                            Html.RenderPartial("_Star");
+                            break;
+                    } }
+</div>
+@section Scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+}
