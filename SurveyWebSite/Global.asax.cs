@@ -27,7 +27,7 @@ namespace SurveyWebSite
                 RouteConfig.RegisterRoutes(RouteTable.Routes);
                 BundleConfig.RegisterBundles(BundleTable.Bundles);
                 Operation.RefreshData();
-                //Operation.PutListToShow = QuestionHub.Show; 
+                Operation.PutListToShow = QuestionController.AutoRefresh;
             }
             catch (Exception ex)
             {

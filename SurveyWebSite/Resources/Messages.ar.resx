@@ -153,15 +153,6 @@
   <data name="EditQuestionStar" xml:space="preserve">
     <value>تم تعديل سؤال النجم بنجاح</value>
   </data>
-  <data name="EditSlider" xml:space="preserve">
-    <value>تعديل سؤال المنزلق</value>
-  </data>
-  <data name="EditSmile" xml:space="preserve">
-    <value>تعديل سؤال الوجه</value>
-  </data>
-  <data name="EditStar" xml:space="preserve">
-    <value>تعديل سؤال النجوم</value>
-  </data>
   <data name="EndCaption" xml:space="preserve">
     <value>رمز النهاية</value>
   </data>
@@ -189,8 +180,8 @@
   <data name="ErrorMessageForText" xml:space="preserve">
     <value>'يرجى ملء هذا الحقل' </value>
   </data>
-  <data name="ErrorRefrsh" xml:space="preserve">
-    <value>حدث خطأ عند تحديث الاسئلة في الصفحة الرئيسة في المتحكم </value>
+  <data name="ErrorRefresh" xml:space="preserve">
+    <value>حدث خطأ عند تحديث البيانات في المتحكم</value>
   </data>
   <data name="GoBack" xml:space="preserve">
     <value>العودة</value>
@@ -219,14 +210,23 @@
   <data name="Slider" xml:space="preserve">
     <value>المنزلق</value>
   </data>
+  <data name="SliderPage" xml:space="preserve">
+    <value>صفحة سؤال المنزلق</value>
+  </data>
   <data name="Smile" xml:space="preserve">
     <value>الوجه</value>
+  </data>
+  <data name="SmilePage" xml:space="preserve">
+    <value> صفحة  سؤال الوجوه</value>
   </data>
   <data name="SomeThingWrong" xml:space="preserve">
     <value>حدث خطأ ما !</value>
   </data>
   <data name="Star" xml:space="preserve">
     <value>النجم</value>
+  </data>
+  <data name="StarPage" xml:space="preserve">
+    <value>صفحة سؤال النجوم</value>
   </data>
   <data name="StartCaption" xml:space="preserve">
     <value>رمز البداية</value>

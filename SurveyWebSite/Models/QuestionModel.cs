@@ -1,4 +1,5 @@
-﻿using Question;
+﻿using BaseLog;
+using Question;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,8 +8,10 @@ using System.Web;
 
 namespace SurveyWebSite.Models
 {
+    
     public class QuestionModel
     {
+        public static Logger Logger = new BaseLog.Logger();
         [DataType(DataType.MultilineText)]
         [StringLength(100, ErrorMessageResourceName = "TheQuestionIsToLong", ErrorMessageResourceType = typeof(Question.Resources.Messages))]
         [Required(ErrorMessageResourceName = "QuestionIsEmptyMessage", ErrorMessageResourceType = typeof(Question.Resources.Messages))]
@@ -37,5 +40,62 @@ namespace SurveyWebSite.Models
         [Required(ErrorMessageResourceName = "EmptyNumberOfStar", ErrorMessageResourceType = typeof(Question.Resources.Messages))]
         [Range(1, 10, ErrorMessageResourceName = "NumberOfStrasBetweenTenAndOne", ErrorMessageResourceType = typeof(Question.Resources.Messages))]
         public int NumberOfStars { get; set; }
+        public static Qustion SpecifyTheTypeAndCreateTheQuestion(QuestionModel NewQustion)
+        {
+            try
+            {
+                if (NewQustion.StartValue > 0)
+                {
+                    Slider NewQuestion = new Slider();
+                    if (NewQustion.Id > 0 && NewQustion.IdForType > 0)
+                    {
+                        NewQuestion.Id = NewQustion.Id;
+                        NewQuestion.IdForType = NewQustion.IdForType;
+                    }
+                    NewQuestion.TypeOfQuestion = TypeOfQuestion.Slider;
+                    NewQuestion.NewText = NewQustion.NewText;
+                    NewQuestion.Order = NewQustion.Order;
+                    NewQuestion.StartValue = NewQustion.StartValue;
+                    NewQuestion.EndValue = NewQustion.EndValue;
+                    NewQuestion.StartCaption = NewQustion.StartCaption;
+                    NewQuestion.EndCaption = NewQustion.EndCaption;
+                    return NewQuestion;
+                }
+                else if (NewQustion.NumberOfSmiles > 0)
+                {
+                    Smiles NewQuestion = new Smiles();
+                    if (NewQustion.Id > 0 && NewQustion.IdForType > 0)
+                    {
+                        NewQuestion.Id = NewQustion.Id;
+                        NewQuestion.IdForType = NewQustion.IdForType;
+                    }
+                    NewQuestion.TypeOfQuestion = TypeOfQuestion.Smily;
+                    NewQuestion.NewText = NewQustion.NewText;
+                    NewQuestion.Order = NewQustion.Order;
+                    NewQuestion.NumberOfSmiles = NewQustion.NumberOfSmiles;
+                    return NewQuestion;
+                }
+                else
+                {
+                    Stars NewQuestion = new Stars();
+                    if (NewQustion.Id > 0 && NewQustion.IdForType > 0)
+                    {
+                        NewQuestion.Id = NewQustion.Id;
+                        NewQuestion.IdForType = NewQustion.IdForType;
+                    }
+                    NewQuestion.TypeOfQuestion = TypeOfQuestion.Stars;
+                    NewQuestion.NewText = NewQustion.NewText;
+                    NewQuestion.Order = NewQustion.Order;
+                    NewQuestion.NumberOfStars = NewQustion.NumberOfStars;
+                    return NewQuestion;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ex.Message);
+                return null;
+            }
+
+        }
     }
 }

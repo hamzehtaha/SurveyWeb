@@ -34,6 +34,7 @@
             background: rgba(0, 0, 0, 0.1);
         }
     </style>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body dir="@SurveyWebSite.Resources.Constants.dir">
@@ -101,26 +102,5 @@ document.querySelectorAll(".table-sortable th").forEach(headerCell => {
         sortTableByColumn(tableElement, headerIndex, !currentIsAscending);
     });
 });
-    setupConnection = (hubProxy) => {
-        hubProxy.client.DisplayQuestion = () => {
-            GetData()
-        };
-    };
-
-    $(document).ready(() => {
-        var connection = $.hubConnection()
-        var hubProxy = connection.createHubProxy('questionHub')
-        setupConnection(hubProxy)
-        connection.start();
-    });
-    function GetData() {
-            $.ajax({
-                url: "/Question/GetData/",
-                type: "get",
-                success: function (result) {
-                    $('#ListOfQuestion').html(result);
-                }
-            });
-
 </script>
 

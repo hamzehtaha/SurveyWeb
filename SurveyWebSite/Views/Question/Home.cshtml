@@ -48,11 +48,37 @@
             background-color: #3e8e41;
         }
     </style>
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script>
+        $(function () {
+            var con = $.connection.questionHub;
+
+            con.client.display = function () {
+               getdata();
+           };  
+            $.connection.hub.start().done(function () {
+                getdata();
+            });
+
+        });
+        function getdata() {
+            console.log("hamzeh")
+            $.ajax({
+                url: "/Question/GetData/",
+                type: "get",
+                success: function (result) {
+                    $('#ListOfQuestion').html(result);
+                }
+            });
+        }
+    </script>
 </head>
 <div dir="@SurveyWebSite.Resources.Constants.dir">
     @{ ViewBag.Title = SurveyWebSite.Resources.Messages.TitleHome; }
     <br />
-    <h2 class="modal-title">@SurveyWebSite.Resources.Messages.TitleHome</h2>
+    <h2 style="color:black; text-align: center;">@SurveyWebSite.Resources.Messages.TitleHome</h2>
     <br />
 
     <br />

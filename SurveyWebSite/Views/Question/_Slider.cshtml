@@ -6,7 +6,7 @@
     @Html.AntiForgeryToken()
 
 <div class="form-horizontal" dir="@SurveyWebSite.Resources.Constants.dir">
-    <h2 style="color:black">@SurveyWebSite.Resources.Messages.EditSlider</h2>
+    <h2 style="color:black">@SurveyWebSite.Resources.Messages.SliderPage</h2>
     <hr />
     <div class="form-group">
         <label class="control-label" col-md-2>@SurveyWebSite.Resources.Messages.QuestionText</label>
@@ -51,7 +51,7 @@
 
     <div class="form-group">
         <input type="submit" class="btn btn-primary" value=@SurveyWebSite.Resources.Messages.SaveButton />
-        <input type="button" class="btn btn-danger" onclick="goBack()" value=@SurveyWebSite.Resources.Messages.CancelButton />
+        <input type="button" class="btn btn-danger"id="myButton" onclick="goBack()" value=@SurveyWebSite.Resources.Messages.CancelButton />
     </div>
 
     <div class="form-group">
@@ -61,14 +61,11 @@
 </div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 }
-<script>
+<script type="text/javascript">
     function goBack() {
         window.history.back();
     }</script>

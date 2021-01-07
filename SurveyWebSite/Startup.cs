@@ -1,5 +1,6 @@
 ﻿using Microsoft.Owin;
 using Owin;
+using SurveyWebSite.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -11,7 +12,13 @@ namespace SurveyWebSite
     {
         public void Configuration(IAppBuilder app)
         {
-            app.MapSignalR(); 
+            try
+            {
+                app.MapSignalR();
+            }catch(Exception ex)
+            {
+                QuestionModel.Logger.Log(ex.Message);
+            }
         }
     }
 }

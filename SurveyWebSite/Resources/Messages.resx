@@ -150,15 +150,6 @@
   <data name="EditQuestionStar" xml:space="preserve">
     <value>Star question has been Edited successfully</value>
   </data>
-  <data name="EditSlider" xml:space="preserve">
-    <value>Slider Edit</value>
-  </data>
-  <data name="EditSmile" xml:space="preserve">
-    <value>Smile Edit</value>
-  </data>
-  <data name="EditStar" xml:space="preserve">
-    <value>Star Edit</value>
-  </data>
   <data name="EndCaption" xml:space="preserve">
     <value>EndCaption</value>
   </data>
@@ -189,8 +180,8 @@
   <data name="ErrorMessageForText" xml:space="preserve">
     <value>Please fill out the question filed !</value>
   </data>
-  <data name="ErrorRefrsh" xml:space="preserve">
-    <value>Something wrong while refresh question in home controller</value>
+  <data name="ErrorRefresh" xml:space="preserve">
+    <value>Something wrong while refresh data in controller</value>
   </data>
   <data name="GoBack" xml:space="preserve">
     <value>Back</value>
@@ -219,14 +210,23 @@
   <data name="Slider" xml:space="preserve">
     <value>Slider</value>
   </data>
+  <data name="SliderPage" xml:space="preserve">
+    <value>Slider question Page</value>
+  </data>
   <data name="Smile" xml:space="preserve">
     <value>Smile</value>
+  </data>
+  <data name="SmilePage" xml:space="preserve">
+    <value>Smile question Page</value>
   </data>
   <data name="SomeThingWrong" xml:space="preserve">
     <value>Something went wrong !</value>
   </data>
   <data name="Star" xml:space="preserve">
     <value>Star</value>
+  </data>
+  <data name="StarPage" xml:space="preserve">
+    <value>Star question Page</value>
   </data>
   <data name="StartCaption" xml:space="preserve">
     <value>StartCaption</value>

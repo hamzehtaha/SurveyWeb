@@ -14,6 +14,8 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI;
 using System.Data.SqlClient;
 using SurveyWebSite.Hubs;
+using Microsoft.Ajax.Utilities;
+using Microsoft.AspNet.SignalR;
 
 namespace SurveyWebSite.Controllers
 {
@@ -31,12 +33,10 @@ namespace SurveyWebSite.Controllers
         {
             try
             {
-                string sessionID = HttpContext.Session.SessionID;
-                SessionID = sessionID; 
-                Operation.SessionFlags.Add(sessionID, false);
-                int ResultOfGet = Operation.GetQustion(ref MyListClass.ListOfQuestions); 
+                AutoRefresh(); 
+                int ResultOfGet = Operation.GetQustion(ref Operation.ListOfAllQuestion); 
                 if (ResultOfGet == OperationManger.GenralVariables.Succeeded)
-                return View(MyListClass.ListOfQuestions);
+                return View(Operation.ListOfAllQuestion);
                 else
                 {
                     string Error = Operation.CheckMessageError(ResultOfGet);
@@ -54,27 +54,7 @@ namespace SurveyWebSite.Controllers
         /// This for refresh my partail view atfer any edit in list 
         /// </summary>
         /// <returns></returns>
-        public ActionResult RefreshData()
-        {
-            try
-            {
-
-                if (Operation.SessionFlags[SessionID])
-                {
-                    Operation.SessionFlags[SessionID] = false;
-                    MyListClass.ListOfQuestions = Operation.ListOfAllQuestion;
-                    return PartialView(@SurveyWebSite.Resources.Constants.PartailList, MyListClass.ListOfQuestions);
-                }
-                else
-                    return PartialView(@SurveyWebSite.Resources.Constants.PartailList, MyListClass.ListOfQuestions);
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.Message);
-                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorRefrsh });
-            }
-        }
+        
         /// <summary>
         /// This create view for get a question to add it 
         /// </summary>
@@ -120,7 +100,7 @@ namespace SurveyWebSite.Controllers
         {
             try
             {
-                Qustion NewQuestion = SpecifyTheTypeAndCreateTheQuestion(NewQustionModel);
+                Qustion NewQuestion = QuestionModel.SpecifyTheTypeAndCreateTheQuestion(NewQustionModel);
                 if (NewQuestion != null)
                 {
                     int ResultOfCheck = Operation.CheckTheData(NewQuestion);
@@ -262,7 +242,7 @@ namespace SurveyWebSite.Controllers
         {
             try
             {
-                Qustion QuestionWillEdit = SpecifyTheTypeAndCreateTheQuestion(NewQustion);
+                Qustion QuestionWillEdit = QuestionModel.SpecifyTheTypeAndCreateTheQuestion(NewQustion);
                 QuestionWillEdit.Id = NewQustion.Id;
                 if (QuestionWillEdit != null)
                 {
@@ -339,67 +319,30 @@ namespace SurveyWebSite.Controllers
         }
         
         
-        private Qustion SpecifyTheTypeAndCreateTheQuestion (QuestionModel NewQustion)
-        {
-            try
-            {
-                if (NewQustion.StartValue > 0)
-                {
-                    Slider NewQuestion = new Slider();
-                    if (NewQustion.Id > 0 && NewQustion.IdForType > 0)
-                    {
-                        NewQuestion.Id = NewQustion.Id;
-                        NewQuestion.IdForType = NewQustion.IdForType;
-                    }
-                    NewQuestion.TypeOfQuestion = TypeOfQuestion.Slider;
-                    NewQuestion.NewText = NewQustion.NewText;
-                    NewQuestion.Order = NewQustion.Order;
-                    NewQuestion.StartValue = NewQustion.StartValue;
-                    NewQuestion.EndValue = NewQustion.EndValue;
-                    NewQuestion.StartCaption = NewQustion.StartCaption;
-                    NewQuestion.EndCaption = NewQustion.EndCaption;
-                    return NewQuestion;
-                }
-                else if (NewQustion.NumberOfSmiles > 0)
-                {
-                    Smiles NewQuestion = new Smiles();
-                    if (NewQustion.Id > 0 && NewQustion.IdForType > 0)
-                    {
-                        NewQuestion.Id = NewQustion.Id;
-                        NewQuestion.IdForType = NewQustion.IdForType;
-                    }
-                    NewQuestion.TypeOfQuestion = TypeOfQuestion.Smily;
-                    NewQuestion.NewText = NewQustion.NewText;
-                    NewQuestion.Order = NewQustion.Order;
-                    NewQuestion.NumberOfSmiles = NewQustion.NumberOfSmiles;
-                    return NewQuestion;
-                }
-                else
-                {
-                    Stars NewQuestion = new Stars();
-                    if (NewQustion.Id > 0 && NewQustion.IdForType > 0)
-                    {
-                        NewQuestion.Id = NewQustion.Id;
-                        NewQuestion.IdForType = NewQustion.IdForType;
-                    }
-                    NewQuestion.TypeOfQuestion = TypeOfQuestion.Stars;
-                    NewQuestion.NewText = NewQustion.NewText;
-                    NewQuestion.Order = NewQustion.Order;
-                    NewQuestion.NumberOfStars = NewQustion.NumberOfStars;
-                    return NewQuestion;
-                }
-            }catch( Exception ex)
-            {
-                Logger.Log(ex.Message);
-                return null; 
-            }
-
-        }
+       
 
         public ActionResult GetData()
         {
-            var ListQuestion = Operation.GetAllQuestion();
-            return PartialView("_ListPartail", ListQuestion);
+            try
+            {
+                var ListQuestion = Operation.ListOfAllQuestion;
+                return PartialView(@SurveyWebSite.Resources.Constants.PartailList, ListQuestion);
+            }catch(Exception ex)
+            {
+                Logger.Log(ex.Message);
+                return RedirectToAction(SurveyWebSite.Resources.Constants.ErrorView, new { ErrorMessage = SurveyWebSite.Resources.Messages.ErrorRefresh });
+            }
+        }
+        public static void AutoRefresh()
+        {
+            try
+            {
+                IHubContext context = GlobalHost.ConnectionManager.GetHubContext<questionHub>();
+                context.Clients.All.display();
+            }catch(Exception ex)
+            {
+                Logger.Log(ex.Message);
+            }
         }
         
 
