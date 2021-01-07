@@ -16,15 +16,12 @@ namespace OperationManger
     {
 
         public  delegate void ShowDataDelegate();
-        public delegate ActionResult ShowDataDelegateMVC(string lang);
         public static ShowDataDelegate PutListToShow;
-        public static ShowDataDelegateMVC PutListToShowMVC;
         public static Thread ThreadForRefresh; 
         public static List<Qustion> ListOfAllQuestion = new List<Qustion>();
         private static int TimeForChangeData = Convert.ToInt32(ConfigurationManager.AppSettings["TimeDataChange"]);
         public static bool IsDifferntList = false;
         public static Boolean EnableAutoRefrsh = true;
-        public static Dictionary<string,bool> SessionFlags = new Dictionary<string, bool>();
         private static bool IsNumber(string Number)
         {
             try
